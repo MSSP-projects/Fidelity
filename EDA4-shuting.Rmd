@@ -23,10 +23,11 @@ for (i in 1:730){
 ```{r}
 library(Rssa)
 ## matrix:30*701,xxt 30*30, number of eigenvalues is 30. DECOMPOSITION.
-s <- ssa(x2, L = 30, neig = NULL, kind = "1d-ssa", svd.method = "auto")
+s <- ssa(x2, L = 30, neig = NULL, kind = "1d-ssa", svd.method = "eigen")
 summary(s)
 plot(s)
-s$sigma #singular values
+s$sigma#singular values
+280.007534/sum(s$sigma)
 # s$U
 # s$V
 plot(s, type = "vectors", idx = 1:15) #two main eigenvalue are trends, what is it?
@@ -70,8 +71,9 @@ cons2 <- cons[,c(6,13)]
 norm.cons2n <- sqrt(colMeans(cons2^2))
 cons2n <-sweep(cons2, 2, norm.cons2n, "/")
 L <- 30
-s.cons2n <- ssa(cons2n, L = L, kind = "mssa")
+s.cons2n <- ssa(cons2n, L = L, kind = "mssa",svd.method ="svd") ##add method
 s.cons2 <- ssa(cons2, L = L, kind = "mssa")
+length(s.cons2)
 r.cons2n <- reconstruct(s.cons2n, groups = list(Trend = c(1, 12, 14), Seasonality = c(2:11, 13)))
 r.cons2 <- reconstruct(s.cons2, groups = list(Trend = 1, Seasonality = 2:11))
 
@@ -83,27 +85,30 @@ wrap.plot <- function(rec, component = 1, series, ...){
      auto.key = "",...)}
 #plot(r.cons2n,add.original = TRUE)
 
-trel1 <- wrap.plot(r.cons2n, series = 2, main = NULL)
-trel2 <- wrap.plot(r.cons2n, series = 1, ylab = "Fort, norm", main = NULL)
-trel3 <- wrap.plot(r.cons2, series = 2, ylab = "Rose", main = NULL) 
-trel4 <- wrap.plot(r.cons2, series = 1, ylab = "Fort", main = NULL)
+trel1 <- wrap.plot(r.cons2n, series = 2, ylab = "2, norm",main = NULL)
+trel2 <- wrap.plot(r.cons2n, series = 1, ylab = "2, norm", main = NULL)
+trel3 <- wrap.plot(r.cons2, series = 2, ylab = "1", main = NULL) 
+trel4 <- wrap.plot(r.cons2, series = 1, ylab = "2", main = NULL)
 
 plot(trel1, split = c(1, 1, 2, 2), more = TRUE)
 plot(trel2, split = c(1, 2, 2, 2), more = TRUE)
 plot(trel3, split = c(2, 1, 2, 2), more = TRUE)
 plot(trel4, split = c(2, 2, 2, 2))
 
-
+## masanao
+str(s.cons2n)
+dim(s.cons2n$U)
+dim(s.cons2n$V)
+plot(s.cons2n$U[,1] )
+plot(s.cons2n$U[,2] )
+plot(s.cons2n$V[,2] )
+plot(s.cons2n$V[,3] )
+plot(s.cons2n$V[,1] )
 
 ```
 
-## test 
+## SSA-FARY
 ```{r}
-library(dplyr)
-load("AustralianWine.rda")
-AustralianWine<-AustralianWine
-
+actual_daily <- read.csv("~/Desktop/BU-2021fall/MA675-stat pract/partner project/data/actual_daily.csv")
 ```
-
-
 
