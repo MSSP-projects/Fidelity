@@ -52,6 +52,8 @@ exe_actual_distance <- function(begin,end,take_log=FALSE){
       dis_ac_exe[i] <- DTWDistance(actual,exe, window.type="sakoechiba",window.size=1)
      }
     else{
+      actual <- actual_0[actual_0$NEWID==i,5] 
+      exe <- exe_0[exe_0$NEWID==i,5]
       logactual<-log(actual+minact)
       logexectut<-log(exe+minexc)  
       acct_ave[i]<-mean(unlist(logactual))
@@ -121,4 +123,8 @@ gridExtra::grid.arrange(exe_actual_validate_one_warehouse(date.start,date.end,28
                         ncol=3)
 ```
 
+```{r}
+library("plot3D")
+scatter3D(log(dis_ac_exe_final2$actual+1), log(dis_ac_exe_final2$executed+1), log(dis_ac_exe_final2$distance+1))
+```
 
