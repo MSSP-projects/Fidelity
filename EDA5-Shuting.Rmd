@@ -86,18 +86,51 @@ ggplot(dis_ac_exe_final2)+geom_point()+
 ```
 log make less influence of gap between exe & act.
 
+
+## Define Best K
+
+```{r}
+library(factoextra)
+library(NbClust)
+cls <- log(dis_ac_exe_final2[,-1]+1)
+cls_scale <- scale(cls)
+
+fviz_nbclust(cls,kmeans, method = "wss") + geom_vline(xintercept = 4, linetype = 2)  + labs(subtitle = "Elbow method")
+
+fviz_nbclust(cls, kmeans, method = "silhouette") + labs(subtitle = "Silhouette method")
+
+set.seed(123)
+fviz_nbclust(cls, kmeans, nstart = 25,  method = "gap_stat", nboot = 50)+
+  labs(subtitle = "Gap statistic method")
+
+## NbClust
+NbClust(cls, diss=NULL, distance = "euclidean", min.nc=2, max.nc=10, 
+            method = "kmeans", index = "all")
+NbClust(cls, diss=NULL, distance = "euclidean", min.nc=2, max.nc=15, 
+            method = "complete", index = "all")
+#According to the majority rule, the best number of clusters is  4
+```
+The plot above represents the variance within the clusters. It decreases as k increases, but it can be seen a bend at k = 4. This bend indicates that additional clusters beyond the fourth have little value. We’ll classify the observations into 4 clusters.
+
+Elbow method: 4 clusters solution suggested
+Silhouette method: 2 clusters solution suggested
+Gap statistic method: 6 clusters solution suggested
+
+
 ## cluster warehouses based on distance between execution and actual credit
 ```{r}
 ## cluster
 library(pheatmap)
 set.seed(1)
 pheatmap(log(dis_ac_exe_final2[,-1]+1))
-fitres <- pheatmap(log(dis_ac_exe_final2[,-1]+1),kmeans_k = 6)
+fitres <- pheatmap(log(dis_ac_exe_final2[,-1]+1),kmeans_k = 4)
 fitres$kmeans$cluster 
 
 ## add clustering info to original dataset
 df_ac_exe_cluster2 <- cbind(dis_ac_exe_final2, cluster = fitres$kmeans$cluster)
+
 ```
+
 
 ## Validation
 ```{r}
@@ -124,7 +157,33 @@ gridExtra::grid.arrange(exe_actual_validate_one_warehouse(date.start,date.end,28
 ```
 
 ```{r}
-library("plot3D")
-scatter3D(log(dis_ac_exe_final2$actual+1), log(dis_ac_exe_final2$executed+1), log(dis_ac_exe_final2$distance+1))
+# library("plot3D")
+# scatter3D(log(dis_ac_exe_final2$actual+1), log(dis_ac_exe_final2$executed+1), log(dis_ac_exe_final2$distance+1))
+```
+
+```{r}
+## validation update 2021.12.1
+exe_actual_validate <- function(begin,end,ID1,ID2,ID3,ID4,ID5){
+  ac_validate <- actual_daily[actual_daily$NEWID %in% c(ID1,ID2,ID3,ID4,ID5),]
+  ac_validate <- ac_validate[ac_validate$date >=begin & ac_validate$date<= end,]
+  exe_validate <- execution_daily[execution_daily$NEWID %in% c(ID1,ID2,ID3,ID4,ID5),]
+  exe_validate <- exe_validate[exe_validate$date >=begin & exe_validate$date<= end,]
+  acplot <- ggplot(ac_validate) + 
+    aes(x=date,y=sum,color=factor(NEWID))+
+    geom_point()+
+    geom_smooth(method = "lm", se=F,color="black")+
+    geom_line(alpha=0.5)+
+    ylab("actual_credit")
+  exeplot <- ggplot(exe_validate) +
+    aes(x=date,y=sum,color=factor(NEWID))+
+    geom_point()+
+    geom_smooth(method = "lm", se=F,color="black")+
+    geom_line()+
+    ylab("execution_credit")
+  return(list(acplot,exeplot))
+}
+
+exe_actual_validate("2020-11-29","2021-01-24",1,2,4,5,10)
+
 ```
 
