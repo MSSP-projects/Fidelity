@@ -135,6 +135,9 @@ df_ac_exe_cluster2 <- cbind(dis_ac_exe_final2, cluster = fitres$kmeans$cluster)
 ## Validation
 ```{r}
 exe_actual_validate_one_warehouse <- function(begin,end,ID1){
+  # ID1 <- 189
+  # begin <- "2021-03-29"
+  # end <- "2021-07-04"
   ac_validate <- actual_daily[actual_daily$NEWID %in% c(ID1),]
   ac_validate <- ac_validate[ac_validate$date >=begin & ac_validate$date<= end,]
   exe_validate <- execution_daily[execution_daily$NEWID %in% c(ID1),]
@@ -150,8 +153,8 @@ exe_actual_validate_one_warehouse <- function(begin,end,ID1){
 ## randomly pick one warehouse to check series pattern
 date.start="2021-03-29"
 date.end="2021-07-04"
-gridExtra::grid.arrange(exe_actual_validate_one_warehouse(date.start,date.end,288),
-                        exe_actual_validate_one_warehouse(date.start,date.end,157),
+gridExtra::grid.arrange(exe_actual_validate_one_warehouse(date.start,date.end,26),
+                        exe_actual_validate_one_warehouse(date.start,date.end,189),
                         exe_actual_validate_one_warehouse(date.start,date.end,273),
                         ncol=3)
 ```
@@ -170,20 +173,69 @@ exe_actual_validate <- function(begin,end,ID1,ID2,ID3,ID4,ID5){
   exe_validate <- exe_validate[exe_validate$date >=begin & exe_validate$date<= end,]
   acplot <- ggplot(ac_validate) + 
     aes(x=date,y=sum,color=factor(NEWID))+
-    geom_point()+
-    geom_smooth(method = "lm", se=F,color="black")+
-    geom_line(alpha=0.5)+
+    geom_smooth(method = "lm", se=F,color="blue")+
+    geom_line()+
     ylab("actual_credit")
   exeplot <- ggplot(exe_validate) +
     aes(x=date,y=sum,color=factor(NEWID))+
-    geom_point()+
-    geom_smooth(method = "lm", se=F,color="black")+
+    geom_smooth(method = "lm", se=F,color="blue")+
     geom_line()+
     ylab("execution_credit")
-  return(list(acplot,exeplot))
+  return(list(gridExtra::grid.arrange(acplot,exeplot,ncol=2)))
 }
 
-exe_actual_validate("2020-11-29","2021-01-24",1,2,4,5,10)
 
+p11 <- exe_actual_validate_one_warehouse(date.start,date.end,26)
+p12 <- exe_actual_validate_one_warehouse(date.start,date.end,97)
+p13 <- exe_actual_validate_one_warehouse(date.start,date.end,98)
+p14 <- exe_actual_validate_one_warehouse(date.start,date.end,186)
+p15 <- exe_actual_validate_one_warehouse(date.start,date.end,191)
+
+p41 <- exe_actual_validate_one_warehouse(date.start,date.end,6)
+p41 <- exe_actual_validate_one_warehouse(date.start,date.end,32)
+p41 <- exe_actual_validate_one_warehouse(date.start,date.end,8)
+p41 <- exe_actual_validate_one_warehouse(date.start,date.end,36)
+p41 <- exe_actual_validate_one_warehouse(date.start,date.end,19)
+
+
+```
+```{r}
+exe_actual_validate_ac <- function(begin,end,ID1,ID2,ID3,ID4,ID5){
+  ac_validate <- actual_daily[actual_daily$NEWID %in% c(ID1,ID2,ID3,ID4,ID5),]
+  ac_validate <- ac_validate[ac_validate$date >=begin & ac_validate$date<= end,]
+  exe_validate <- execution_daily[execution_daily$NEWID %in% c(ID1,ID2,ID3,ID4,ID5),]
+  exe_validate <- exe_validate[exe_validate$date >=begin & exe_validate$date<= end,]
+  acplot <- ggplot(ac_validate) + 
+    aes(x=date,y=sum,color=factor(NEWID))+
+    geom_smooth(method = "lm", se=F,color="blue")+
+    geom_line()+
+    ylab("actual_credit")
+  return(acplot)
+}
+
+exe_actual_validate_exe <- function(begin,end,ID1,ID2,ID3,ID4,ID5){
+  ac_validate <- actual_daily[actual_daily$NEWID %in% c(ID1,ID2,ID3,ID4,ID5),]
+  ac_validate <- ac_validate[ac_validate$date >=begin & ac_validate$date<= end,]
+  exe_validate <- execution_daily[execution_daily$NEWID %in% c(ID1,ID2,ID3,ID4,ID5),]
+  exe_validate <- exe_validate[exe_validate$date >=begin & exe_validate$date<= end,]
+  exeplot <- ggplot(exe_validate) +
+    aes(x=date,y=sum,color=factor(NEWID))+
+    geom_smooth(method = "lm", se=F,color="blue")+
+    geom_line()+
+    ylab("execution_credit")
+  return(exeplot)
+}
+
+p1ac <- exe_actual_validate_ac("2021-03-29","2021-07-04",186,26,97,98,191)
+p4ac <- exe_actual_validate_ac("2021-03-29","2021-07-04",6,32,8,36,19)
+p3ac <- exe_actual_validate_ac("2021-03-29","2021-07-04",63,53,51,47,25)
+p2ac <- exe_actual_validate_ac("2021-03-29","2021-07-04",58,38,91,69,70)
+
+p1exe <- exe_actual_validate_exe("2021-03-29","2021-07-04",186,26,97,98,191)
+p4exe <- exe_actual_validate_exe("2021-03-29","2021-07-04",6,32,8,36,19)
+p3exe <- exe_actual_validate_exe("2021-03-29","2021-07-04",63,53,51,47,25)
+p2exe <- exe_actual_validate_exe("2021-03-29","2021-07-04",58,38,91,69,70)
+
+gridExtra::grid.arrange(p1ac,p1exe,p4ac,p4exe,p3ac,p3exe,p2ac,p2exe,nrow=4,ncol=2)
 ```
 
